@@ -1,88 +1,3 @@
-function displayRecipes(recipes) {
-  const container = document.querySelector(".cardsContainer");
-  const arrOfAllIngredients = [];
-  const arrOfAllAppliance = [];
-  const arrOfAllUstensild = [];
-
-  container.innerHTML = "";
-
-  // Loop on JSON file
-  for (let i = 0, n = recipes.length; i < n; i++) {
-    let li = "";
-
-    // Push all Appliance in array
-    arrOfAllAppliance.push(ucwords(recipes[i].appliance));
-
-    // Push all Ustensils in array
-    recipes[i].ustensils.forEach((ustensil) => {
-      arrOfAllUstensild.push(ucwords(ustensil));
-    });
-
-    // Get all ingredients list for each recipes
-    recipes[i].ingredients.forEach((ingredient) => {
-      // Push all Ingredients in array
-      arrOfAllIngredients.push(ucwords(ingredient.ingredient));
-      return (li += `<li>${ingredient.ingredient}: <span>${
-        ingredient.quantity || ingredient.quantite
-          ? ingredient.quantity || ingredient.quantite
-          : ""
-      }</span> <span>${ingredient.unit ? ingredient.unit : ""}</span></li>`);
-    });
-
-    // Display Card
-    container.innerHTML += `
-        <div class="mainCard">
-            <div class="imgTop">
-                <img src="" alt="" />
-            </div>
-            <div class="contentCard">
-                <div class="headerContent">
-                    <h5 class="card-title">${recipes[i].name}</h5>
-                    <div class="timeRecipes">
-                        <i class="fa-regular fa-clock"></i>   
-                        <span>${recipes[i].time} min</span>
-                    </div>
-                </div>
-                <div class="bodyContent">
-                    <ul>
-                        ${li}
-                    </ul>
-                    <p>
-                        ${recipes[i].description}
-                    </p>
-                </div>
-            </div>
-        </div>
-      `;
-  }
-
-  // Remove all duplicate ingredients
-  const uniqIngredients = [...new Set(arrOfAllIngredients)];
-  const uniqAppliance = [...new Set(arrOfAllAppliance)];
-  const uniqUstensils = [...new Set(arrOfAllUstensild)];
-
-  // Feed ingredients dropdown
-  const ingredientsDropdown = document.getElementById("ingredientList");
-  ingredientsDropdown.innerHTML = "";
-  for (let i = 0; i < uniqIngredients.length; i++) {
-    ingredientsDropdown.innerHTML += `<li onclick="alert('${uniqIngredients[i]}')">${uniqIngredients[i]}</li>`;
-  }
-
-  // Feed appliance dropdown
-  const applianceList = document.getElementById("applianceList");
-  applianceList.innerHTML = "";
-  for (let i = 0; i < uniqAppliance.length; i++) {
-    applianceList.innerHTML += `<li onclick="alert('${uniqAppliance[i]}')">${uniqAppliance[i]}</li>`;
-  }
-
-  // feed ustensils dropdown
-  const ustensilsList = document.getElementById("ustensilsList");
-  ustensilsList.innerHTML = "";
-  for (let i = 0; i < uniqUstensils.length; i++) {
-    ustensilsList.innerHTML += `<li onclick="alert('${uniqUstensils[i]}')">${uniqUstensils[i]}</li>`;
-  }
-}
-
 // Filter on input in dropdown
 function filterDropdown() {
   let dropdown = document.querySelectorAll(".dropdown-content");
@@ -104,6 +19,45 @@ function filterDropdown() {
   }
 }
 
+// Get all input search in dropdown
+const ingredientsSearch = document.getElementById("ingredientsInput");
+const applianceSearch = document.getElementById("appareilsInput");
+const ustensilsSearch = document.getElementById("ustensilesInput");
+
+// Active filter for each input search
+function filterInputSearchKeyup(input) {
+  // Active filter by keyboard
+  input.addEventListener("keyup", (e) => {
+    // Get array in localStorage
+    let tagsFilter = JSON.parse(localStorage.getItem("filter-apply"));
+    if (e.key === "Enter" && e.target.value !== "") {
+      // Cancel push in array if value exist in tagsFilters
+      for (let i = 0; i < tagsFilter.length; i++) {
+        if (tagsFilter.includes(e.target.value.toUpperCase())) {
+          e.target.value = "";
+          return;
+        }
+      }
+
+      tagsFilter.push(e.target.value.toUpperCase());
+      localStorage.setItem("filter-apply", JSON.stringify(tagsFilter));
+
+      // Render new tags & filter by tags
+      filterTagsApply();
+      displayTagsFilter();
+
+      // Reset input
+      e.target.value = "";
+    }
+  });
+}
+
+// All filter input
+filterInputSearchKeyup(ingredientsSearch);
+filterInputSearchKeyup(applianceSearch);
+filterInputSearchKeyup(ustensilsSearch);
+filterInputSearchKeyup(searchInput);
+
 // Capitalize the first letter
 function ucwords(str) {
   return (str + "").replace(/^(.)|\s+(.)/g, function ($1) {
@@ -111,31 +65,114 @@ function ucwords(str) {
   });
 }
 
-async function filterByText(text) {
-  // Initialize array for filter by text
-  const recipesByFilterText = [];
+async function filterTagsApply() {
+  let tagsFilter = JSON.parse(localStorage.getItem("filter-apply"));
 
   // Fetch all recipes
   const data = await getRecipes();
   const recipes = data.recipes;
 
-  // Check all recipes, if the text is includes
-  for (let i = 0, el = recipes.length; i < el; i++) {
-    let currentRecipes = recipes[i];
-    if (currentRecipes.name.toUpperCase().includes(text.toUpperCase())) {
-      recipesByFilterText.push(currentRecipes);
+  if (tagsFilter && tagsFilter.length !== 0) {
+    const regex = new RegExp(
+      `${tagsFilter
+        .map(
+          (el) => `\\b${el.name ? el.name.toUpperCase() : el.toUpperCase()}\\b`
+        )
+        .join("|")}`
+    );
+
+    // Init Array for display recipes
+    const filteredByTags = [];
+
+    for (let i = 0, n = recipes.length; i < n; i++) {
+      // Check name of recipes
+      if (regex.test(recipes[i].name.toUpperCase())) {
+        filteredByTags.push(recipes[i]);
+
+        categorizedTags(recipes[i].name, "title");
+      }
+
+      // Check description of recipes
+      if (regex.test(recipes[i].description.toUpperCase())) {
+        filteredByTags.push(recipes[i]);
+
+        categorizedTags(recipes[i].description, "title");
+      }
+
+      // Check appliance of recipes
+      if (regex.test(recipes[i].appliance.toUpperCase())) {
+        filteredByTags.push(recipes[i]);
+
+        categorizedTags(recipes[i].appliance, "appliance");
+      }
+
+      // Check ingredients of recipes
+      recipes[i].ingredients.some((ing) => {
+        if (regex.test(ing.ingredient.toUpperCase())) {
+          filteredByTags.push(recipes[i]);
+
+          categorizedTags(ing.ingredient, "ingredients");
+        }
+
+        // HARDCODED //
+        if (ing.ingredient.toUpperCase() === "SUCRE VANILLÉ") {
+          filteredByTags.push(recipes[i]);
+
+          categorizedTags(ing.ingredient, "ingredients");
+        }
+      });
+
+      // Check ustensils of recipes
+      recipes[i].ustensils.some((ustensil) => {
+        if (regex.test(ustensil.toUpperCase())) {
+          filteredByTags.push(recipes[i]);
+
+          categorizedTags(ustensil, "ustensils");
+        }
+
+        // HARDCODED //
+        if (ustensil.toUpperCase() === "ÉCONOME") {
+          filteredByTags.push(recipes[i]);
+
+          categorizedTags(ustensil, "ustensils");
+        }
+      });
     }
 
-    currentRecipes.ingredients.forEach((ingredient) => {
-      if (ingredient.ingredient.toUpperCase().includes(text.toUpperCase())) {
-        recipesByFilterText.push(currentRecipes);
-      }
-    });
+    // Remove all dupplicate recipes*
+    const unique = filteredByTags.filter(
+      (value, index, array) =>
+        array.findIndex((secondValue) =>
+          ["id"].every((key) => secondValue[key] === value[key])
+        ) === index
+    );
+
+    // Render new recipes
+    displayRecipes(unique);
+  } else {
+    // Render all recipes
+    displayRecipes(recipes);
   }
+}
 
-  // Remove all dupplicate recipes
-  const uniqFilterText = [...new Set(recipesByFilterText)];
+filterTagsApply();
 
-  // Display new list of recipes
-  displayRecipes(uniqFilterText);
+function categorizedTags(value, category) {
+  let tagsFilter = JSON.parse(localStorage.getItem("filter-apply"));
+
+  const categorized = tagsFilter.map((element) => {
+    if (element === value.toUpperCase()) {
+      return {
+        name: element,
+        category,
+      };
+    } else {
+      return element;
+    }
+  });
+
+  tagsFilter = categorized;
+
+  localStorage.setItem("filter-apply", JSON.stringify(tagsFilter));
+  displayTagsFilter();
 }
