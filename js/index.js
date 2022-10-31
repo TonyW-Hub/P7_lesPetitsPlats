@@ -1,10 +1,3 @@
-// Init display data
-(async function init() {
-  const data = await getRecipes();
-  displayRecipes(data.recipes);
-  filterDropdown();
-})();
-
 // Init array of filter tags selected by user
 let tagsFilter = JSON.parse(localStorage.getItem("filter-apply"));
 if (!tagsFilter) {
@@ -242,4 +235,31 @@ function updateTagsInLocalStorage(value) {
 
   // Render new recipes & tags
   filterTagsApply();
+}
+
+function categorizedTags(value, category) {
+  let tagsFilter = JSON.parse(localStorage.getItem("filter-apply"));
+
+  const categorized = tagsFilter.map((element) => {
+    if (element === value.toUpperCase()) {
+      return {
+        name: element,
+        category,
+      };
+    } else {
+      return element;
+    }
+  });
+
+  tagsFilter = categorized;
+
+  localStorage.setItem("filter-apply", JSON.stringify(tagsFilter));
+  displayTagsFilter();
+}
+
+// Capitalize the first letter
+function ucwords(str) {
+  return (str + "").replace(/^(.)|\s+(.)/g, function ($1) {
+    return $1.toUpperCase();
+  });
 }
