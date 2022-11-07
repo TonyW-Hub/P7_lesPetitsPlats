@@ -11,68 +11,47 @@ async function filterTagsApply() {
     const regex = new RegExp(
       `${tagsFilter
         .map(
-          (el) => `\\b${el.name ? el.name.toUpperCase() : el.toUpperCase()}\\b`
+          (el) => `\\b${el.name ? el.name.toUpperCase() : el.toUpperCase()}(?!\\S)`
         )
         .join("|")}`
     );
-
     // Init Array for display recipes
     const filteredByTags = [];
 
-    for (let i = 0, n = recipes.length; i < n; i++) {
+    recipes.forEach((recipe) => {
       // Check name of recipes
-      if (regex.test(recipes[i].name.toUpperCase())) {
-        filteredByTags.push(recipes[i]);
-
-        categorizedTags(recipes[i].name, "title");
+      if (regex.test(recipe.name.toUpperCase())) {
+        categorizedTags(recipe.name, "title");
+        filteredByTags.push(recipe);
       }
 
       // Check description of recipes
-      if (regex.test(recipes[i].description.toUpperCase())) {
-        filteredByTags.push(recipes[i]);
-
-        categorizedTags(recipes[i].description, "title");
-      }
-
-      // Check appliance of recipes
-      if (regex.test(recipes[i].appliance.toUpperCase())) {
-        filteredByTags.push(recipes[i]);
-
-        categorizedTags(recipes[i].appliance, "appliance");
+      if (regex.test(recipe.description.toUpperCase())) {
+        categorizedTags(recipe.description, "title");
+        filteredByTags.push(recipe);
       }
 
       // Check ingredients of recipes
-      recipes[i].ingredients.some((ing) => {
+      recipe.ingredients.forEach((ing) => {
         if (regex.test(ing.ingredient.toUpperCase())) {
-          filteredByTags.push(recipes[i]);
-
           categorizedTags(ing.ingredient, "ingredients");
-        }
-
-        // HARDCODED //
-        if (ing.ingredient.toUpperCase() === "SUCRE VANILLÉ") {
-          filteredByTags.push(recipes[i]);
-
-          categorizedTags(ing.ingredient, "ingredients");
+          filteredByTags.push(recipe);
         }
       });
 
-      // Check ustensils of recipes
-      recipes[i].ustensils.some((ustensil) => {
+      // Check appliance of recipes
+      if (regex.test(recipe.appliance.toUpperCase())) {
+        categorizedTags(recipe.appliance, "appliance");
+        filteredByTags.push(recipe);
+      }
+
+      recipe.ustensils.forEach((ustensil) => {
         if (regex.test(ustensil.toUpperCase())) {
-          filteredByTags.push(recipes[i]);
-
           categorizedTags(ustensil, "ustensils");
-        }
-
-        // HARDCODED //
-        if (ustensil.toUpperCase() === "ÉCONOME") {
-          filteredByTags.push(recipes[i]);
-
-          categorizedTags(ustensil, "ustensils");
+          filteredByTags.push(recipe);
         }
       });
-    }
+    });
 
     // Remove all dupplicate recipes*
     const unique = filteredByTags.filter(

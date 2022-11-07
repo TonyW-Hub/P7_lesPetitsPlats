@@ -183,7 +183,8 @@ main {
 }
 
 .title {
-  color: black;
+  color: white;
+  background: #fab855;
 }
 
 .btn {
@@ -310,7 +311,8 @@ main {
     align-items: center;
   }
 
-  .bodyContent ul, .bodyContent p {
+  .bodyContent ul,
+  .bodyContent p {
     width: 100%;
   }
 }

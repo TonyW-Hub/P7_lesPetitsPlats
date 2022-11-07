@@ -18,7 +18,6 @@ searchButton.addEventListener("click", () => {
   const allDropDown = document.querySelectorAll(".dropdown");
   const closeDropdwon = document.querySelectorAll(".closeDropdown");
 
-  // Open dropdown
   for (let i = 0; i < allDropDown.length; i++) {
     allDropDown[i].querySelector(".btn").addEventListener("click", () => {
       allDropDown[i].classList.toggle("grow");
@@ -35,7 +34,6 @@ searchButton.addEventListener("click", () => {
     });
   }
 
-  // Close dropdown
   for (let i = 0; i < closeDropdwon.length; i++) {
     closeDropdwon[i].addEventListener("click", () => {
       allDropDown[i].classList.toggle("grow");
