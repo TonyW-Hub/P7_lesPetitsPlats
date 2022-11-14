@@ -11,7 +11,8 @@ async function filterTagsApply() {
     const regex = new RegExp(
       `${tagsFilter
         .map(
-          (el) => `\\b${el.name ? el.name.toUpperCase() : el.toUpperCase()}\\b`
+          (el) =>
+            `${el.name ? el.name.toUpperCase() : el.toUpperCase()}`
         )
         .join("|")}`
     );
@@ -48,25 +49,11 @@ async function filterTagsApply() {
 
           categorizedTags(ing.ingredient, "ingredients");
         }
-
-        // HARDCODED //
-        if (ing.ingredient.toUpperCase() === "SUCRE VANILLÉ") {
-          filteredByTags.push(recipes[i]);
-
-          categorizedTags(ing.ingredient, "ingredients");
-        }
       });
 
       // Check ustensils of recipes
       recipes[i].ustensils.some((ustensil) => {
         if (regex.test(ustensil.toUpperCase())) {
-          filteredByTags.push(recipes[i]);
-
-          categorizedTags(ustensil, "ustensils");
-        }
-
-        // HARDCODED //
-        if (ustensil.toUpperCase() === "ÉCONOME") {
           filteredByTags.push(recipes[i]);
 
           categorizedTags(ustensil, "ustensils");
