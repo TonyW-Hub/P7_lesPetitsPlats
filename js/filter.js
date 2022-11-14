@@ -17,7 +17,6 @@ async function filterTagsApply() {
         .join("|")}`
     );
 
-    console.log(regex);
     // Init Array for display recipes
     const filteredByTags = [];
 
