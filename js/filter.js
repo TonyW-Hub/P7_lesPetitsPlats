@@ -11,7 +11,7 @@ async function filterTagsApply() {
     const regex = new RegExp(
       `${tagsFilter
         .map(
-          (el) => `\\b${el.name ? el.name.toUpperCase() : el.toUpperCase()}(?!\\S)`
+          (el) => `${el.name ? el.name.toUpperCase() : el.toUpperCase()}`
         )
         .join("|")}`
     );
