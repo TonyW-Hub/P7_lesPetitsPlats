@@ -7,37 +7,22 @@ async function filterTagsApply() {
   const data = await getRecipes();
   const recipes = data.recipes;
 
+  // Init Array for display recipes
+  const filteredRecipes = [];
+
   if (tagsFilter && tagsFilter.length !== 0) {
     const regex = new RegExp(
       `${tagsFilter
-        .map(
-          (el) =>
-            `${el.name ? el.name.toUpperCase() : el.toUpperCase()}`
-        )
+        .map((el) => `${el.name ? el.name.toUpperCase() : el.toUpperCase()}`)
         .join("|")}`
     );
 
-    // Init Array for display recipes
-    const filteredByTags = [];
-
     for (let i = 0, n = recipes.length; i < n; i++) {
-      // Check name of recipes
-      if (regex.test(recipes[i].name.toUpperCase())) {
-        filteredByTags.push(recipes[i]);
-
-        categorizedTags(recipes[i].name, "title");
-      }
-
-      // Check description of recipes
-      if (regex.test(recipes[i].description.toUpperCase())) {
-        filteredByTags.push(recipes[i]);
-
-        categorizedTags(recipes[i].description, "title");
-      }
+      let check = 0;
 
       // Check appliance of recipes
       if (regex.test(recipes[i].appliance.toUpperCase())) {
-        filteredByTags.push(recipes[i]);
+        check++;
 
         categorizedTags(recipes[i].appliance, "appliance");
       }
@@ -45,7 +30,7 @@ async function filterTagsApply() {
       // Check ingredients of recipes
       recipes[i].ingredients.some((ing) => {
         if (regex.test(ing.ingredient.toUpperCase())) {
-          filteredByTags.push(recipes[i]);
+          check++;
 
           categorizedTags(ing.ingredient, "ingredients");
         }
@@ -54,15 +39,22 @@ async function filterTagsApply() {
       // Check ustensils of recipes
       recipes[i].ustensils.some((ustensil) => {
         if (regex.test(ustensil.toUpperCase())) {
-          filteredByTags.push(recipes[i]);
+          check++;
 
           categorizedTags(ustensil, "ustensils");
         }
       });
+
+      if (check === tagsFilter.length) {
+        console.log(recipes[i]);
+        filteredRecipes.push(recipes[i]);
+      }
     }
 
+    console.log(filteredRecipes);
+
     // Remove all dupplicate recipes*
-    const unique = filteredByTags.filter(
+    const unique = filteredRecipes.filter(
       (value, index, array) =>
         array.findIndex((secondValue) =>
           ["id"].every((key) => secondValue[key] === value[key])
