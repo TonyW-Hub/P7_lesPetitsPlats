@@ -26,12 +26,10 @@ searchButton.addEventListener("click", () => {
         .querySelector(".dropdown-content")
         .classList.toggle("show");
 
-      let currentDropdown = allDropDown[i].querySelector(".dropdown-content");
+      let currentDropdown = allDropDown[i].querySelector("ul");
       let widthDropdown = currentDropdown.offsetWidth;
-      let heightDropdown = currentDropdown.offsetHeight - 15;
 
       allDropDown[i].style.width = widthDropdown + "px";
-      allDropDown[i].style.height = heightDropdown + "px";
     });
   }
 
