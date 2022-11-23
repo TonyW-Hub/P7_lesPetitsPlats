@@ -10,51 +10,43 @@ async function filterTagsApply() {
   if (tagsFilter && tagsFilter.length !== 0) {
     const regex = new RegExp(
       `${tagsFilter
-        .map(
-          (el) => `${el.name ? el.name.toUpperCase() : el.toUpperCase()}`
-        )
+        .map((el) => `${el.name ? el.name.toUpperCase() : el.toUpperCase()}`)
         .join("|")}`
     );
     // Init Array for display recipes
-    const filteredByTags = [];
+    const filteredRecipes = [];
 
     recipes.forEach((recipe) => {
-      // Check name of recipes
-      if (regex.test(recipe.name.toUpperCase())) {
-        categorizedTags(recipe.name, "title");
-        filteredByTags.push(recipe);
-      }
-
-      // Check description of recipes
-      if (regex.test(recipe.description.toUpperCase())) {
-        categorizedTags(recipe.description, "title");
-        filteredByTags.push(recipe);
-      }
+      let check = 0;
 
       // Check ingredients of recipes
       recipe.ingredients.forEach((ing) => {
         if (regex.test(ing.ingredient.toUpperCase())) {
           categorizedTags(ing.ingredient, "ingredients");
-          filteredByTags.push(recipe);
+          check++;
         }
       });
 
       // Check appliance of recipes
       if (regex.test(recipe.appliance.toUpperCase())) {
         categorizedTags(recipe.appliance, "appliance");
-        filteredByTags.push(recipe);
+        check++;
       }
 
       recipe.ustensils.forEach((ustensil) => {
         if (regex.test(ustensil.toUpperCase())) {
           categorizedTags(ustensil, "ustensils");
-          filteredByTags.push(recipe);
+          check++;
         }
       });
+
+      if (check === tagsFilter.length) {
+        filteredRecipes.push(recipe);
+      }
     });
 
     // Remove all dupplicate recipes*
-    const unique = filteredByTags.filter(
+    const unique = filteredRecipes.filter(
       (value, index, array) =>
         array.findIndex((secondValue) =>
           ["id"].every((key) => secondValue[key] === value[key])
